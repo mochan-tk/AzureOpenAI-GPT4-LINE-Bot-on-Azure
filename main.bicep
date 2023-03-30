@@ -8,124 +8,11 @@ param containerVer string
 param appsPort string
 
 var appInsightsName = 'AppInsights'
-var storageAccountName = 'fnstor${toLower(substring(replace(random, '-', ''), 0, 18))}'
-var containerName = 'files'
-
-param accountName string = 'cosmos-${toLower(random)}'
-var databaseName = 'SimpleDB'
-var cosmosContainerName = 'Accounts'
-
-@description('That name is the name of our application. It has to be unique.Type a name followed by your resource group name. (<name>-<resourceGroupName>)')
-param cognitiveServiceName string = 'CognitiveService-${uniqueString(resourceGroup().id)}'
 
 param openAiAccountName string = 'OpenAI-${uniqueString(resourceGroup().id)}'
 param openAIModelDeploymentName string = 'OpenAIDev-${uniqueString(resourceGroup().id)}'
 //param openAiRegion string = 'East US'
 param openAiRegion string = 'South Central US'
-
-/*
-resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
-  name: storageAccountName
-  location: location
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
-  properties: {
-    supportsHttpsTrafficOnly: true
-    encryption: {
-      services: {
-        file: {
-          keyType: 'Account'
-          enabled: true
-        }
-        blob: {
-          keyType: 'Account'
-          enabled: true
-        }
-      }
-      keySource: 'Microsoft.Storage'
-    }
-    accessTier: 'Hot'
-  }
-}
-
-resource container 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
-  name: '${storageAccount.name}/default/${containerName}'
-  properties: {
-    publicAccess:'Container'
-  }
-}
-
-// https://docs.microsoft.com/en-us/azure/cosmos-db/sql/manage-with-bicep
-resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2022-08-15' = {
-  name: toLower(accountName)
-  location: location
-  kind: 'GlobalDocumentDB'
-  properties: {
-    //enableFreeTier: true
-    databaseAccountOfferType: 'Standard'
-    consistencyPolicy: {
-      defaultConsistencyLevel: 'Session'
-    }
-    locations: [
-      {
-        locationName: location
-        failoverPriority: 0
-        isZoneRedundant: false
-      }
-    ]
-    capabilities: [
-      {
-        name: 'EnableServerless'
-      }
-    ]
-  }
-}
-
-resource cosmosDB 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases@2022-08-15' = {
-  parent: cosmosAccount
-  name: databaseName
-  properties: {
-    resource: {
-      id: databaseName
-    }
-  }
-}
-
-resource cosmosContainer 'Microsoft.DocumentDB/databaseAccounts/sqlDatabases/containers@2022-08-15' = {
-  parent: cosmosDB
-  name: cosmosContainerName
-  properties: {
-    resource: {
-      id: cosmosContainerName
-      partitionKey: {
-        paths: [
-          '/partitionKey'
-        ]
-        kind: 'Hash'
-      }
-     }
-     options:{}
-    }
-  }
-
-// https://learn.microsoft.com/en-us/azure/cognitive-services/create-account-bicep?tabs=CLI
-resource cognitiveService 'Microsoft.CognitiveServices/accounts@2022-12-01' = {
-  name: cognitiveServiceName
-  location: location
-  sku: {
-    name: 'S0'
-  }
-  kind: 'CognitiveServices'
-  properties: {
-    apiProperties: {
-      statisticsEnabled: false
-    }
-  }
-}
-
-*/
 
 // https://github.com/Azure-Samples/cosmosdb-chatgpt/blob/4ce83e6236cf311beb3a7b2367932c8c7b429268/azuredeploy.bicep#L111
 resource openAiAccount 'Microsoft.CognitiveServices/accounts@2022-12-01' = {
@@ -147,8 +34,8 @@ resource openAiAccountName_openAIModelDeployment 'Microsoft.CognitiveServices/ac
   properties: {
     model: {
       format: 'OpenAI'
-      name: 'gpt-35-turbo'
-      version: '0301'
+      name: 'gpt-4'
+      version: '0314'
     }
     scaleSettings: {
       scaleType: 'Standard'
@@ -269,40 +156,6 @@ resource containerApps 'Microsoft.App/containerApps@2022-10-01' = {
               name: 'OPENAI_API_ENGINE_NAME'
               value: openAIModelDeploymentName
             }
-            /*
-            {
-              name: 'STORAGE_CONNECTION_STRING'
-              value: 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};EndpointSuffix=${environment().suffixes.storage};AccountKey=${listKeys(storageAccount.id, storageAccount.apiVersion).keys[0].value}'
-            }
-            {
-              name: 'COSMOSDB_ACCOUNT'
-              value: cosmosAccount.properties.documentEndpoint
-            }
-            {
-              name: 'COSMOSDB_KEY'
-              value: cosmosAccount.listKeys().primaryMasterKey
-            }
-            {
-              name: 'COSMOSDB_DATABASENAME'
-              value: databaseName
-            }
-            {
-              name: 'COSMOSDB_CONTAINERNAME'
-              value: cosmosContainerName
-            }
-            {
-              name: 'COSMOSDB_CONNECTION_STRING'
-              value: 'AccountEndpoint=${cosmosAccount.properties.documentEndpoint};AccountKey=${cosmosAccount.listKeys().primaryMasterKey};'
-            }
-            {
-              name: 'COGNITIVESERVICE_KEY'
-              value: cognitiveService.listKeys().key1
-            }
-            {
-              name: 'COGNITIVESERVICE_ENDPOINT'
-              value: cognitiveService.properties.endpoint
-            }
-            */
           ]
         }
       ]
